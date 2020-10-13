@@ -1,0 +1,14 @@
+{
+	"OV": {
+		"UserName" : "",
+		"Password" : "",
+		"Url" : ""
+	},
+	"SFTP": {
+		"Host" : "",
+		"UserName" : "",
+		"Password" : "",
+		"InboundDirectory" : "",
+		"OutboundDirectory" : ""
+	}
+}

@@ -1,14 +1,14 @@
 {
 	"OV": {
-		"UserName" : "",
-		"Password" : "",
-		"Url" : ""
+		"UserName" : "spetteway",
+		"Password" : "cxr2q95XIxpF",
+		"Url" : "dev-seavizion.onevizion.com"
 	},
 	"SFTP": {
-		"Host" : "",
-		"UserName" : "",
-		"Password" : "",
-		"InboundDirectory" : "",
-		"OutboundDirectory" : ""
+		"Host" : "ftp.onevizion.com",
+		"UserName" : "sea_dev_spms",
+		"Password" : "BubnWrhYxB4k",
+		"InboundDirectory" : "/home/samsung/dev_spms/Inbound",
+		"OutboundDirectory" : "/home/samsung/dev_spms/Outbound"
 	}
 }

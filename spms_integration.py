@@ -17,7 +17,7 @@ try:
 	SftpHost   = params['SFTP']['Host']
 	SftpUN     = params['SFTP']['UserName']
 	SftpPWD    = params['SFTP']['Password']
-	SftpInDir  - params['SFTP']['InboundDirectory']
+	SftpInDir  = params['SFTP']['InboundDirectory']
 	SftpOutDir = params['SFTP']['OutboundDirectory']
 except Exception as e:
 	raise "Please check settings"
@@ -47,7 +47,7 @@ except:
 	quit(1)
 
 # make sure api user has RE on the tab with checkbox and the field list of blobs and RE for the trackor type(sometimes Checklist) and R for WEB_SERVICES 
-Req = onevizion.Trackor(trackorType = 'SPMS_INTERFACE', URL = OvUrl, userName=OvUserName, password=OvPassword)
+Req = onevizion.Trackor(trackorType = 'SPMSINTERFACE', URL = OvUrl, userName=OvUserName, password=OvPassword)
 Req.read(filters = {'SI_READY_FOR_DELIVERY': 1}, 
 		fields = ['TRACKOR_KEY','SI_READY_FOR_DELIVERY','SI_INTERFACE_FILE'], 
 		sort = {'TRACKOR_KEY':'ASC'}, page = 1, perPage = 1000)
@@ -62,22 +62,25 @@ for f in Req.jsonData:
 	f1 = open(f['TRACKOR_KEY'],'w')
 	f1.write(f['SI_INTERFACE_FILE'])
 	f1.close()
-	with sftp.cd(SftpInDir) as s:
-		s.put(f['TRACKOR_KEY'])
+	with sftp.cd(SftpOutDir) :
+	#	s.put(SftpOutDir+"/"+f['TRACKOR_KEY'])
+		sftp.put(f['TRACKOR_KEY'])
 
 	Req.update(filters = {'TRACKOR_ID': f['TRACKOR_ID']}, fields = {'SI_READY_FOR_DELIVERY': 0})
 
 # get complete list of files in directory
-with sftp.cd(SftpOutDir) as s:
-	files = s.listdir()
+with sftp.cd(SftpInDir) as s:
+	files = sftp.listdir()
 
 	print(files)
 
 	for f in files:
-		s.get(f)
-		with open(f,'r') as x;
+		if f == 'Archive':
+			continue
+		sftp.get(f)
+		with open(f,'r') as x:
 			interface_file = x.read()
 		Req.create(fields = {"TRACKOR_KEY": f, 'SI_INTERFACE_FILE': interface_file})
-		if len(Req.errors)=0:
-			s.rename(SftpOutDir+'/'+f,SftpOutDir+'/Archive/'+f)
+		if len(Req.errors)==0:
+			sftp.rename(f,'Archive/'+f)
 

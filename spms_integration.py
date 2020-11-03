@@ -75,7 +75,7 @@ with sftp.cd(SftpInDir) as s:
 	print(files)
 
 	for f in files:
-		if f == 'Archive':
+		if f in ['Archive','100_202011021753_JY.csv']:
 			continue
 		sftp.get(f)
 		with open(f,'r') as x:

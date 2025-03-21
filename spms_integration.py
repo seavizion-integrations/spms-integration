@@ -50,9 +50,7 @@ try:
 		#cnopts = pysftp.CnOpts()
 		#cnopts.hostkeys = None
 		with open('key.txt', 'w') as the_file:
-			the_file.write('-----BEGIN OPENSSH PRIVATE KEY-----\n')
-			the_file.write(SftpKEY+'\n')
-			the_file.write('-----END OPENSSH PRIVATE KEY-----\n')
+			the_file.write(SftpKEY)
 
 		sftp = pysftp.Connection(SftpHost,
 			username=SftpUN,

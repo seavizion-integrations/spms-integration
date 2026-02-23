@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
+import subprocess
+import sys
+import json
+
+installed_dependencies = subprocess.check_output([sys.executable, '-m', 'pip', 'install', '-r', 'python_dependencies.ini']).decode().strip()
+if 'Successfully installed' in installed_dependencies:
+    raise Exception('Some required dependent libraries were installed. ' \
+                    'Module execution has to be terminated now to use installed libraries on the next scheduled launch.')
 
 import json
 import os
 import onevizion
-import shutil
-import pysftp
+#import shutil
+#import pysftp
 import sys
+from sftpmanager import SFTPManager
 
 # Read settings
 with open('settings','r') as p:
@@ -30,7 +39,8 @@ class MyCnOpts:  #used by sftp connection
 
 # connect to SFTP
 try:
-	#not best practice, but avoids needing entry in .ssh/known_hosts
+	sftp = SFTPManager(SftpHost, SftpUN, password=SftpPWD, private_key=SftpKEY)
+	'''	#not best practice, but avoids needing entry in .ssh/known_hosts
 	#from Joe Cool near end of https://bitbucket.org/dundeemt/pysftp/issues/109/hostkeysexception-no-host-keys-found-even
 	cnopts = MyCnOpts()
 	cnopts.log = False
@@ -56,7 +66,7 @@ try:
 			username=SftpUN,
 			private_key='key.txt',
 			cnopts = cnopts
-			)
+			)'''
 except:
 	onevizion.Message('could not connect')
 	onevizion.Message(sys.exc_info())
@@ -80,32 +90,30 @@ for f in Req.jsonData:
 	f1.write(f['SI_INTERFACE_FILE'])
 	f1.close()
 	print ('kilroy was here 3')
-	with sftp.cd(SftpOutDir) :
-	#	s.put(SftpOutDir+"/"+f['TRACKOR_KEY'])
-		sftp.put(f['TRACKOR_KEY'])
+	sftp.upload(f['TRACKOR_KEY'], SftpInDir+'/'+f['TRACKOR_KEY'])
+	#with sftp.cd(SftpOutDir) :
+	##	s.put(SftpOutDir+"/"+f['TRACKOR_KEY'])
+	#	sftp.put(f['TRACKOR_KEY'])
 
 	print ('kilroy was here 4')
 	Req.update(filters = {'TRACKOR_ID': f['TRACKOR_ID']}, fields = {'SI_READY_FOR_DELIVERY': 0})
+	os.remove(f['TRACKOR_KEY'])
 
 # get complete list of files in directory
-with sftp.cd(SftpInDir) as s:
-	print ('kilroy was here 5 '+SftpInDir)
-	files = sftp.listdir()
-
-	print(files)
-
-	for f in files:
-		if f in ['Archive','100_202011021753_JY.csv']:
-			continue
-		print(f'getting {f}')
-		sftp.get(f)
-		with open(f,'r') as x:
-			interface_file = x.read()
-		print ('kilroy was here 6')
-		Req.create(fields = {"TRACKOR_KEY": f, 'SI_INTERFACE_FILE': interface_file})
-		if len(Req.errors)==0:
-			sftp.rename(f,'Archive/'+f)
+for f in sftp.list_directory(SftpInDir):
+	if f in ['Archive','100_202011021753_JY.csv']:
+		continue
+	print(f'getting {f}')
+	sftp.retrieve(SftpInDir+'/'+f, f)
+	with open(f,'r') as x:
+		interface_file = x.read()
+	print ('kilroy was here 6')
+	Req.create(fields = {"TRACKOR_KEY": f, 'SI_INTERFACE_FILE': interface_file})
+	if len(Req.errors)==0:
+		sftp.move(SftpInDir+'/'+f, SftpInDir+'/Archive/'+f)
 	print ('kilroy was here 7')
+	os.remove(f)
+
 print ('kilroy was here 8')
 
-sftp.close()
+sftp.disconnect()

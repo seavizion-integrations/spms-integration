@@ -110,6 +110,10 @@ for f in sftp.list_directory(SftpInDir):
 	print ('kilroy was here 6')
 	Req.create(fields = {"TRACKOR_KEY": f, 'SI_INTERFACE_FILE': interface_file})
 	if len(Req.errors)==0:
+		try:
+			sftp.delete(SftpInDir+'/Archive/'+f)
+		except:
+			pass # file should not be there, but if it is, we will move it to archive and delete local copy
 		sftp.move(SftpInDir+'/'+f, SftpInDir+'/Archive/'+f)
 	print ('kilroy was here 7')
 	os.remove(f)

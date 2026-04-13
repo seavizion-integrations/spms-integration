@@ -103,6 +103,13 @@ for f in Req.jsonData:
 for f in sftp.list_directory(SftpInDir):
 	if f in ['Archive','100_202011021753_JY.csv']:
 		continue
+	Req.read(filters = {'TRACKOR_KEY': f}, fields = ['TRACKOR_KEY'])
+	if len(Req.jsonData)>0:
+		try:
+			sftp.delete(SftpInDir+'/Archive/'+f)
+		except:
+			pass # file should not be there, but if it is, we will move it to archive and delete local copy
+		sftp.move(SftpInDir+'/'+f, SftpInDir+'/Archive/'+f)
 	print(f'getting {f}')
 	sftp.retrieve(SftpInDir+'/'+f, f)
 	with open(f,'r') as x:

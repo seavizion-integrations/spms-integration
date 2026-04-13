@@ -84,13 +84,13 @@ if len(Req.errors)>0:
 	print ('kilroy was here 2')
 	quit(1)
 
-# send files to Inbound directory
+# send files to Outbound directory
 for f in Req.jsonData:
 	f1 = open(f['TRACKOR_KEY'],'w')
 	f1.write(f['SI_INTERFACE_FILE'])
 	f1.close()
 	print ('kilroy was here 3')
-	sftp.upload(f['TRACKOR_KEY'], SftpInDir+'/'+f['TRACKOR_KEY'])
+	sftp.upload(f['TRACKOR_KEY'], SftpOutDir+'/'+f['TRACKOR_KEY'])
 	#with sftp.cd(SftpOutDir) :
 	##	s.put(SftpOutDir+"/"+f['TRACKOR_KEY'])
 	#	sftp.put(f['TRACKOR_KEY'])

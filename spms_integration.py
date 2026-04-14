@@ -110,6 +110,7 @@ for f in sftp.list_directory(SftpInDir):
 		except:
 			pass # file should not be there, but if it is, we will move it to archive and delete local copy
 		sftp.move(SftpInDir+'/'+f, SftpInDir+'/Archive/'+f)
+		continue
 	print(f'getting {f}')
 	sftp.retrieve(SftpInDir+'/'+f, f)
 	with open(f,'r') as x:
